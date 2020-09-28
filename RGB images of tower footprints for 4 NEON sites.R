@@ -1,20 +1,5 @@
 
 
-
-
-
-
-########## plot the Bartlett tower
-easting=316812.16, northing=4881511.55
-
-### WREF tower
-easting=581417.95, northing=5074637.09
-
-### SRER tower
-515553.9, 3530547.12
-
-### 
-
 library(neonUtilities)
 library(rgeos)
 library(raster)
@@ -103,7 +88,7 @@ plotRGB(tow_konz)
 
 
 
-
+# plot the 4 towers
 par(mfrow=c(2,2))
 plotRGB(tow_konz)
 plotRGB(tow_bart)
@@ -114,7 +99,7 @@ plotRGB(tow_osbs)
 
 
 
-
+## ignore below-  For future mapping of soil moisture sensor location within each of the tower footprints
 soil_moist <-
   loadByProduct(
     site = "SRER",
@@ -124,21 +109,10 @@ soil_moist <-
   )
 
 # you can get locations of veg plots conveniently using getLocTOS
+## (except, use soil moisture no tree inventory
 m <- getLocTOS(data = tree$vst_mappingandtagging,
                dataProd = "vst_mappingandtagging")
 
-
-
-byTileAOP("DP3.30010.001", site="BART", year="2019", 
-          check.size = F,buffer = 200,
-          easting=316812.16, northing=4881511.55 , savepath="neon_downloads")
-img_bart<-stack("neon_downloads\\DP3.30010.001\\2019\\FullSite\\D14\\2019_SRER_3\\L3\\Camera\\Mosaic\\2019_SRER_3_515000_3530000_image.tif")
-plotRGB(img_bart)
-
-
-byTileAOP("DP3.30010.001", site="KONZ", year="2019", 
-          check.size = F,buffer = 200,
-          easting=316812.16, northing=4881511.55 , savepath="neon_downloads")
 
 
 
