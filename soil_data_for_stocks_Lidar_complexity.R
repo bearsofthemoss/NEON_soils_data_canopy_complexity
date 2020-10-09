@@ -8,7 +8,6 @@ library(lidR)
 library(gstat)
 library(rgeos)
 library(data.table)
-
 library(sp)
 library(rgdal)
 library(raster)
@@ -87,37 +86,31 @@ plot(use$nitrogenTot_stock, use$carbonTot_stock)
 
 table(use$horizonName , is.na(use$carbonTot_stock))  # the Oa horizon has a lot of missing samples?
 
-# start by creating the column you want to add data to, then go by row and calculate the values
+# start by creating the column you want to add data to, then go by row and calculate the values. Here, I've created a function to test if the default calculation leads to Na's
+# dummy column
 use$carbonTot_stock = NA
+# options for calculations
+option1 = function(row, column){
+  use[row,column] * use$bulkDensFieldMoist[row] * use$horizonThickness[row] / 1000
+}
+option2 = function(row, column){
+  use[row,column] * use$bulkDensThirdBar[row] * use$horizonThickness[row] / 1000
+}
+
 # for every row in "use", check the following conditions
 for(i in c(1:nrow(use))){
-  if(use$horizonName[i] == "Oa"){
-    # if the horizon is Oa, do this calculation
-    use$carbonTot_stock[i] = use$carbonTot[i] * use$bulkDensThirdBar[i] * use$horizonThickness[i] / 1000
-  } else {
-    # otherwise, do this calculation
-    use$carbonTot_stock[i] = use$carbonTot[i] * use$bulkDensThirdBar[i] * use$horizonThickness[i] / 1000
+# for both rows carbonTot and NitrogenTot, check the following conditions
+  for(a in c(6, 7)){
+    if(is.na(option1(i, a)) == FALSE){
+      # if the horizon is Oa, do this calculation
+      use$carbonTot_stock[i] = option1(i, a)
+    } else {
+      # otherwise, do this calculation
+      use$carbonTot_stock[i] = option2(i, a)
+    }
   }
 }
 
-
-# I see there are some additional NAs. You could add the other thin soil layers to the first calculation group:
-if(use$horizonName == "Oa" | use$horizonName == "Oa1" | use$horizonName == "Bs"){
-  # if the horizon is Oa or Oa1 or Bs, do this calculation
-} else {
-  # otherwise, do this calculation
-}
-
-# you can also add more options
-if(use$horizonName == "Oa"){
-  # if the horizon is Oa or Oa1 or Bs, do this calculation
-} else if(use$horizonName == "Oa1"){
-  # if the horizon is Oa1, do this calculation
-} else if(use$horizonName == "Bs"){
-  # if the horizon is Bs, do this calculation
-} else {
-  # for all other horizones, do this calculation
-}
 
 # 'stock' is a df of the C stock as calculated above
 stock <-
