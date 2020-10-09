@@ -1,6 +1,8 @@
 library(broom)
 library(ggplot2)
 library(neonUtilities)
+library(devtools)
+install_github('NEONScience/NEON-geolocation/geoNEON', dependencies=TRUE)
 library(geoNEON)
 library(lidR)
 library(gstat)
@@ -85,7 +87,37 @@ plot(use$nitrogenTot_stock, use$carbonTot_stock)
 
 table(use$horizonName , is.na(use$carbonTot_stock))  # the Oa horizon has a lot of missing samples?
 
+# start by creating the column you want to add data to, then go by row and calculate the values
+use$carbonTot_stock = NA
+# for every row in "use", check the following conditions
+for(i in c(1:nrow(use))){
+  if(use$horizonName[i] == "Oa"){
+    # if the horizon is Oa, do this calculation
+    use$carbonTot_stock[i] = use$carbonTot[i] * use$bulkDensThirdBar[i] * use$horizonThickness[i] / 1000
+  } else {
+    # otherwise, do this calculation
+    use$carbonTot_stock[i] = use$carbonTot[i] * use$bulkDensThirdBar[i] * use$horizonThickness[i] / 1000
+  }
+}
 
+
+# I see there are some additional NAs. You could add the other thin soil layers to the first calculation group:
+if(use$horizonName == "Oa" | use$horizonName == "Oa1" | use$horizonName == "Bs"){
+  # if the horizon is Oa or Oa1 or Bs, do this calculation
+} else {
+  # otherwise, do this calculation
+}
+
+# you can also add more options
+if(use$horizonName == "Oa"){
+  # if the horizon is Oa or Oa1 or Bs, do this calculation
+} else if(use$horizonName == "Oa1"){
+  # if the horizon is Oa1, do this calculation
+} else if(use$horizonName == "Bs"){
+  # if the horizon is Bs, do this calculation
+} else {
+  # for all other horizones, do this calculation
+}
 
 # 'stock' is a df of the C stock as calculated above
 stock <-
