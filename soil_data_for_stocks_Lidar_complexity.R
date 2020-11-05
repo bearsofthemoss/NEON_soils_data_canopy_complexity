@@ -1,12 +1,13 @@
 library(broom)
 library(ggplot2)
 library(neonUtilities)
+library(devtools)
+install_github('NEONScience/NEON-geolocation/geoNEON', dependencies=TRUE)
 library(geoNEON)
 library(lidR)
 library(gstat)
 library(rgeos)
 library(data.table)
-
 library(sp)
 library(rgdal)
 library(raster)
@@ -85,6 +86,30 @@ plot(use$nitrogenTot_stock, use$carbonTot_stock)
 
 table(use$horizonName , is.na(use$carbonTot_stock))  # the Oa horizon has a lot of missing samples?
 
+# start by creating the column you want to add data to, then go by row and calculate the values. Here, I've created a function to test if the default calculation leads to Na's
+# dummy column
+use$carbonTot_stock = NA
+# options for calculations
+option1 = function(row, column){
+  use[row,column] * use$bulkDensFieldMoist[row] * use$horizonThickness[row] / 1000
+}
+option2 = function(row, column){
+  use[row,column] * use$bulkDensThirdBar[row] * use$horizonThickness[row] / 1000
+}
+
+# for every row in "use", check the following conditions
+for(i in c(1:nrow(use))){
+# for both rows carbonTot and NitrogenTot, check the following conditions
+  for(a in c(6, 7)){
+    if(is.na(option1(i, a)) == FALSE){
+      # if the horizon is Oa, do this calculation
+      use$carbonTot_stock[i] = option1(i, a)
+    } else {
+      # otherwise, do this calculation
+      use$carbonTot_stock[i] = option2(i, a)
+    }
+  }
+}
 
 
 # 'stock' is a df of the C stock as calculated above
